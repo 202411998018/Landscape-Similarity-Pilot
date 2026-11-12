@@ -4,7 +4,7 @@
 
 ## 包含
 - 93张中国/日本/美国/挪威自然风景图片（从用户提供刺激包整理）。
-- 20份预生成的互补试次表，列表各300题（3 × 100），含270主试次、18重复、12标记为attention的试次（这些 attention 试次仅用于探索，不应直接用于排除被试）。
+- 20份预生成的互补试次表，列表各300题（3 × 100），含270主试次、18重复、12个 attention_probe（注意探测试次）（这些 attention 试次仅用于探索，不应直接用于排除被试）。
 - 加载列表后额外呈现6个练习试次，正式采样的300题（3 × 100）不变。注意练习图来自正式候选池，因此可能出现重复，不进入正式分析。
 - 每题400ms注视、三图呈现至作答，键盘1/2/3或鼠标。无国家、地点文字提示。
 - 完成试次自动写入浏览器 localStorage（适合小规模 pilot，正式收集建议加 IndexedDB）；按3个区块（每区块100题）休息，支持恢复和 CSV/JSON 导出。
@@ -26,7 +26,7 @@ python -m http.server 8000
 3. 服务端若启用同源校验，应将实验GitHub Pages域名配置为 `ALLOWED_ORIGIN`。持久化数据目录需要挂载持久卷，不能依赖临时容器文件系统。
 
 ## 数据字段
-列表与数据记录包含 `trial_role` (main/repeat/attention/practice)、`trial_type` (AAA/AAB/ABC)、图片ID、实际左右位置、odd_image、selected_pair、RT、timestamp、session、block、屏幕尺寸。完成页不显示正确率或群体结果。
+列表与数据记录包含 `trial_role` (main/repeat/attention_probe/practice)、`trial_type` (AAA/AAB/ABC)、图片ID、实际左右位置、odd_image、selected_pair、RT、timestamp、session、block、屏幕尺寸。完成页不显示正确率或群体结果。
 
 ## 重要的部署前检查
 - 当前为pilot试用版。正式收集前应逐题人工核查 attention 试次，不要直接据此排除被试。
