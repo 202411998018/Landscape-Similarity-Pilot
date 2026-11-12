@@ -80,7 +80,7 @@ function showBreak(nextBlock){state.breakAcknowledged ||= [];show('break-screen'
 }
 function finish(){show('finished');state.finishedAt ||= new Date().toISOString();persist();const mains=state.responses.filter(r=>r.trial_role==='main');
  const avg=mains.length?Math.round(mains.reduce((s,r)=>s+r.rt_ms,0)/mains.length):0;
- $('#finished-summary').textContent=`匿名编号 ${state.participant} · 列表 ${state.listId} · 主要试次 ${mains.length} · 平均反应时间 ${avg} ms`;
+ $('#finished-summary').textContent=`已完成 ${mains.length} 个正式试次。感谢你的参与。`;
  $('#submit-server').hidden=!cfg.submitEndpoint;if(cfg.submitEndpoint)submitToServer(true,'final').catch(()=>{});
 }
 async function submitToServer(isFinal,phase){if(!cfg.submitEndpoint)throw Error('未配置服务器接口');$('#submit-status').textContent='正在向服务器提交…';
@@ -90,8 +90,8 @@ async function submitToServer(isFinal,phase){if(!cfg.submitEndpoint)throw Error(
  state.submittedBlocks ||= [];if(!state.submittedBlocks.includes(phase))state.submittedBlocks.push(phase);persist();$('#submit-status').textContent='数据已提交到研究服务器。';return res.json();}
 async function start(){if(!$('#consent').checked){alert('请先确认知情同意。');return;}
  const participant=$('#participant').value.trim();if(!validId(participant)){alert('匿名编号应为3–32位字母、数字、下划线或连字符。');return;}
- const manual=$('#list-method').value==='manual';let allocation;
- try{allocation=manual?{listId:$('#list-manual').value,sessionId:crypto.randomUUID()}:await assign(participant);
+ let allocation;
+ try{allocation=await assign(participant);
  const response=await fetch(`lists/triplets_${allocation.listId}.json`,{cache:'no-store'});
  if(!response.ok)throw Error('试次表未找到');trials=await response.json();if(trials.length!==300)throw Error('试次数不为300');
  const practice=makePractice();
@@ -102,8 +102,7 @@ async function start(){if(!$('#consent').checked){alert('请先确认知情同�
 }
 function resume(){try{state=JSON.parse(localStorage.getItem(key));trials=state.trials||[];if(!trials.length)throw Error('缺少列表');runTrial();}catch(e){alert('恢复失败：'+e.message);}}
 function reset(){if(!confirm('确定清空本机未完成的实验记录？请先导出备份。'))return;localStorage.removeItem(key);state=null;updateResume();}
-$('#participant').value=randId();for(let i=1;i<=20;i++){let opt=document.createElement('option');opt.value='L'+String(i).padStart(2,'0');opt.textContent=opt.value;$('#list-manual').append(opt);}
-$('#list-method').onchange=()=>{$('#list-manual-wrap').hidden=$('#list-method').value!=='manual';};
+$('#participant').value=randId();
 $('#start').onclick=start;$('#resume').onclick=resume;$('#reset').onclick=reset;
 $$('.choice').forEach((btn,i)=>btn.onclick=()=>respond(i));
 document.addEventListener('keydown',e=>{if(e.repeat)return;if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;
